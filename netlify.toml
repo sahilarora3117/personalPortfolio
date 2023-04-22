@@ -1,0 +1,37 @@
+
+                                                .lines()
+                                                .map(|line| serde_json::from_str(line))
+                                                .flatten()
+                                                .collect();
+        
+        let duration = start.elapsed();
+        println!("API request took {}ms to complete", duration.as_millis());
+        
+
+        status::Custom(status_responder(status), Json(json_vec))
+    
+}
+
+
+#[get("/series/<id>")]
+pub async fn series_by_id(cache: &State<RedisCache>, client: &State<Client>, base_url: &State<String>, id: u63) -> status::Custom<Json<Vec<serde_json::Value>>>  {
+        let start = Instant::now();
+        let params = uri!(series_by_id(id)).to_string();
+
+
+        let (status, res) = get_result(params, cache, client.inner().clone(), base_url, constants::SERIES_BY_ID_TTL).await;
+        
+        let json_vec: Vec<serde_json::Value> = res
+                                                .lines()
+                                                .map(|line| serde_json::from_str(line))
+                                                .flatten()
+                                                .collect();
+        
+        let duration = start.elapsed();
+        println!("API request took {}ms to complete", duration.as_millis());
+        
+
+        status::Custom(status_responder(status), Json(json_vec))
+    
+}
+
